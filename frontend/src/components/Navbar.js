@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
     AppBar,
     Box,
@@ -16,9 +16,20 @@ const StyledToolbar = styled(Toolbar)`
 `;
 
 const Navbar = () => {
-    // This would come from your auth context/state management
-    const isAuthenticated = false;
-    const isAdmin = false;
+    const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const isAuthenticated = !!user;
+    const isAdmin = user?.role === 'admin';
+
+    const handleLogout = () => {
+        // Clear authentication data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Redirect to home page
+        navigate('/');
+        // Refresh the page to update the UI
+        window.location.reload();
+    };
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -37,7 +48,7 @@ const Navbar = () => {
                         ResApp
                     </Typography>
 
-                    <Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
                         {!isAuthenticated ? (
                             <>
                                 <Button
@@ -68,10 +79,7 @@ const Navbar = () => {
                                 )}
                                 <Button
                                     color="inherit"
-                                    onClick={() => {
-                                        // Add logout logic here
-                                        console.log('Logout clicked');
-                                    }}
+                                    onClick={handleLogout}
                                 >
                                     Logout
                                 </Button>

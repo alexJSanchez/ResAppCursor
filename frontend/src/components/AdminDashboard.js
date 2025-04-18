@@ -10,10 +10,15 @@ import {
     TableHead,
     TableRow,
     Button,
-    Chip,
     Alert,
     CircularProgress,
+    Select,
+    MenuItem,
+    FormControl,
+    IconButton,
+    Tooltip,
 } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import styled from '@emotion/styled';
 
 const StyledPaper = styled(Paper)`
@@ -21,77 +26,102 @@ const StyledPaper = styled(Paper)`
   margin: 24px 0;
 `;
 
-// Mock data - in a real app, this would come from an API
-const mockUsers = [
-    { id: 1, username: 'john_doe', email: 'john@example.com', role: 'user', createdAt: '2023-01-01' },
-    { id: 2, username: 'jane_smith', email: 'jane@example.com', role: 'admin', createdAt: '2023-01-02' },
-    { id: 3, username: 'bob_wilson', email: 'bob@example.com', role: 'user', createdAt: '2023-01-03' },
-];
-
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        // Simulate API call
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                // TODO: Replace with actual API call
-                // const response = await fetch('/api/admin/users');
-                // const data = await response.json();
-                setUsers(mockUsers);
-            } catch (err) {
-                setError('Failed to fetch users');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Unauthorized: Please log in as admin');
+                }
+                throw new Error('Failed to fetch users');
+            }
+
+            const data = await response.json();
+            setUsers(data);
+            setError('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchUsers();
     }, []);
 
     const handleRoleChange = async (userId, newRole) => {
         try {
-            // TODO: Replace with actual API call
-            // await fetch(`/api/admin/users/${userId}/role`, {
-            //   method: 'PUT',
-            //   body: JSON.stringify({ role: newRole }),
-            // });
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update user role');
+            }
+
             setUsers(users.map(user =>
-                user.id === userId ? { ...user, role: newRole } : user
+                user._id === userId ? { ...user, role: newRole } : user
             ));
         } catch (err) {
-            setError('Failed to update user role');
+            setError(err.message);
         }
     };
 
     const handleDeleteUser = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user?')) {
+            return;
+        }
+
         try {
-            // TODO: Replace with actual API call
-            // await fetch(`/api/admin/users/${userId}`, {
-            //   method: 'DELETE',
-            // });
-            setUsers(users.filter(user => user.id !== userId));
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete user');
+            }
+
+            setUsers(users.filter(user => user._id !== userId));
         } catch (err) {
-            setError('Failed to delete user');
+            setError(err.message);
         }
     };
 
-    if (loading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
-
     return (
         <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Admin Dashboard
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h4" component="h1">
+                    Admin Dashboard
+                </Typography>
+                <Tooltip title="Refresh Users">
+                    <IconButton onClick={fetchUsers} color="primary">
+                        <RefreshIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -104,50 +134,58 @@ const AdminDashboard = () => {
                     User Management
                 </Typography>
 
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Username</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell>Role</TableCell>
-                                <TableCell>Created At</TableCell>
-                                <TableCell>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell>{user.username}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={user.role}
-                                            color={user.role === 'admin' ? 'primary' : 'default'}
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            size="small"
-                                            onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
-                                        >
-                                            Toggle Role
-                                        </Button>
-                                        <Button
-                                            size="small"
-                                            color="error"
-                                            onClick={() => handleDeleteUser(user.id)}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </TableCell>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : users.length === 0 ? (
+                    <Typography variant="body1" color="text.secondary">
+                        No users found in the database.
+                    </Typography>
+                ) : (
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Username</TableCell>
+                                    <TableCell>Email</TableCell>
+                                    <TableCell>Role</TableCell>
+                                    <TableCell>Created At</TableCell>
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user._id}>
+                                        <TableCell>{user.username}</TableCell>
+                                        <TableCell>{user.email}</TableCell>
+                                        <TableCell>
+                                            <FormControl size="small" sx={{ minWidth: 120 }}>
+                                                <Select
+                                                    value={user.role}
+                                                    onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                                                >
+                                                    <MenuItem value="user">User</MenuItem>
+                                                    <MenuItem value="admin">Admin</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </TableCell>
+                                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleDeleteUser(user._id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
             </StyledPaper>
 
             <StyledPaper elevation={3}>
