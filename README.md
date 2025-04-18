@@ -2,6 +2,23 @@
 
 A full-stack web application for restaurant management with user authentication and admin capabilities.
 
+## Version History
+
+### Version 1.0.0 (March 2024)
+- Initial release
+- Features:
+  - User Authentication (Login/Register/Logout)
+  - Role-based Access Control (User/Admin)
+  - Admin Dashboard with User Management
+  - MongoDB Database Integration
+  - RESTful API Backend
+  - Material-UI Frontend
+- Technical Stack:
+  - Frontend: React, Material-UI, Emotion
+  - Backend: Node.js, Express, MongoDB
+  - Authentication: JWT, bcrypt
+  - Database: MongoDB Atlas
+
 ## Features
 
 - User Authentication (Login/Register/Logout)

@@ -1,85 +1,73 @@
 import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-    Box,
+    Container,
     Paper,
-    Typography,
     TextField,
     Button,
-    Link,
+    Typography,
+    Box,
     Alert,
 } from '@mui/material';
-import styled from '@emotion/styled';
-
-const StyledPaper = styled(Paper)`
-  padding: 24px;
-  max-width: 400px;
-  margin: 0 auto;
-`;
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password
-                })
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                email,
+                password,
             });
 
-            const data = await response.json();
+            if (response.data.token) {
+                // Store the token
+                localStorage.setItem('token', response.data.token);
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+                // Store the user data
+                const userData = {
+                    id: response.data.user._id,
+                    email: response.data.user.email,
+                    username: response.data.user.username,
+                    role: response.data.user.role
+                };
+
+                // Update auth context
+                login(userData);
+
+                // Redirect based on role
+                if (userData.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/map');
+                }
             }
-
-            // Store the token in localStorage
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-
-            // Navigate to home page after successful login
-            navigate('/');
         } catch (err) {
-            setError(err.message || 'Invalid email or password');
+            setError(err.response?.data?.message || 'Login failed. Please try again.');
         }
     };
 
     return (
-        <Box sx={{ mt: 4 }}>
-            <StyledPaper elevation={3}>
-                <Typography variant="h5" component="h1" gutterBottom align="center">
+        <Container component="main" maxWidth="xs">
+            <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
+                <Typography component="h1" variant="h5" align="center" gutterBottom>
                     Login
                 </Typography>
-
                 {error && (
                     <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
                     </Alert>
                 )}
-
-                <Box component="form" onSubmit={handleSubmit} noValidate>
+                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
                         required
@@ -89,8 +77,8 @@ const Login = () => {
                         name="email"
                         autoComplete="email"
                         autoFocus
-                        value={formData.email}
-                        onChange={handleChange}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <TextField
                         margin="normal"
@@ -101,8 +89,8 @@ const Login = () => {
                         type="password"
                         id="password"
                         autoComplete="current-password"
-                        value={formData.password}
-                        onChange={handleChange}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                     <Button
                         type="submit"
@@ -112,14 +100,9 @@ const Login = () => {
                     >
                         Sign In
                     </Button>
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Link component={RouterLink} to="/register" variant="body2">
-                            {"Don't have an account? Sign Up"}
-                        </Link>
-                    </Box>
                 </Box>
-            </StyledPaper>
-        </Box>
+            </Paper>
+        </Container>
     );
 };
 

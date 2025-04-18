@@ -8,6 +8,7 @@ import {
     Button,
 } from '@mui/material';
 import styled from '@emotion/styled';
+import { useAuth } from '../context/AuthContext';
 
 // Custom styled component using emotion
 const StyledToolbar = styled(Toolbar)`
@@ -16,19 +17,13 @@ const StyledToolbar = styled(Toolbar)`
 `;
 
 const Navbar = () => {
+    const { isAuthenticated, user, logout } = useAuth();
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    const isAuthenticated = !!user;
     const isAdmin = user?.role === 'admin';
 
     const handleLogout = () => {
-        // Clear authentication data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        // Redirect to home page
+        logout();
         navigate('/');
-        // Refresh the page to update the UI
-        window.location.reload();
     };
 
     return (
@@ -49,6 +44,11 @@ const Navbar = () => {
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1 }}>
+                        {isAuthenticated && (
+                            <Button color="inherit" component={RouterLink} to="/map">
+                                Map
+                            </Button>
+                        )}
                         {!isAuthenticated ? (
                             <>
                                 <Button
