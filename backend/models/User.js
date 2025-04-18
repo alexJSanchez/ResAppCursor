@@ -14,7 +14,15 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        validate: {
+            validator: function (v) {
+                return v.length >= 3 &&
+                    /\d/.test(v) &&
+                    /[!@#$%^&*(),.?":{}|<>]/.test(v);
+            },
+            message: 'Password must be at least 3 characters long and contain at least one number and one special character'
+        }
     },
     role: {
         type: String,

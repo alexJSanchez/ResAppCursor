@@ -27,6 +27,19 @@ const Register = () => {
     });
     const [error, setError] = useState('');
 
+    const validatePassword = (password) => {
+        if (password.length < 3) {
+            return 'Password must be at least 3 characters long';
+        }
+        if (!/\d/.test(password)) {
+            return 'Password must contain at least one number';
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            return 'Password must contain at least one special character';
+        }
+        return '';
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -38,6 +51,13 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        // Password validation
+        const passwordError = validatePassword(formData.password);
+        if (passwordError) {
+            setError(passwordError);
+            return;
+        }
 
         // Basic validation
         if (formData.password !== formData.confirmPassword) {
