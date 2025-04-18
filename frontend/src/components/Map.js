@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { Box, Typography, TextField, Button, Paper } from '@mui/material';
+import { Box, TextField, Button, Paper, Alert, CircularProgress } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const LocationMarker = ({ position, setPosition }) => {
-    const map = useMapEvents({
+    useMapEvents({
         click(e) {
             setPosition(e.latlng);
         },
@@ -29,16 +29,51 @@ const LocationMarker = ({ position, setPosition }) => {
 const RestaurantMap = () => {
     const [position, setPosition] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [restaurants, setRestaurants] = useState([]);
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationError, setLocationError] = useState(null);
+
+    useEffect(() => {
+        // Get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setUserLocation([latitude, longitude]);
+                },
+                (error) => {
+                    setLocationError('Unable to retrieve your location');
+                    console.error('Geolocation error:', error);
+                    // Fallback to NYC coordinates
+                    setUserLocation([40.7128, -74.0060]);
+                }
+            );
+        } else {
+            setLocationError('Geolocation is not supported by your browser');
+            // Fallback to NYC coordinates
+            setUserLocation([40.7128, -74.0060]);
+        }
+    }, []);
 
     const handleSearch = async () => {
         // This is a placeholder for actual search functionality
-        // In a real implementation, you would call your backend API
         console.log('Searching for:', searchQuery);
     };
 
+    if (!userLocation) {
+        return (
+            <Box sx={{ height: '100vh', width: '100%', p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ height: '100vh', width: '100%', p: 2 }}>
+            {locationError && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    {locationError}
+                </Alert>
+            )}
             <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <TextField
@@ -55,7 +90,7 @@ const RestaurantMap = () => {
             </Paper>
 
             <MapContainer
-                center={[40.7128, -74.0060]}
+                center={userLocation}
                 zoom={13}
                 style={{ height: '80vh', width: '100%' }}
             >
