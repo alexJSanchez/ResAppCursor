@@ -1,152 +1,122 @@
-# ResApp - Restaurant Management Application
+# ResApp - Residential Property Management System
 
-A full-stack web application for restaurant management with user authentication and admin capabilities.
-
-## Version History
-
-### Version 1.0.0 (March 2024)
-- Initial release
-- Features:
-  - User Authentication (Login/Register/Logout)
-  - Role-based Access Control (User/Admin)
-  - Admin Dashboard with User Management
-  - MongoDB Database Integration
-  - RESTful API Backend
-  - Material-UI Frontend
-- Technical Stack:
-  - Frontend: React, Material-UI, Emotion
-  - Backend: Node.js, Express, MongoDB
-  - Authentication: JWT, bcrypt
-  - Database: MongoDB Atlas
+A full-stack web application for managing residential properties with user authentication and admin features.
 
 ## Features
 
-- User Authentication (Login/Register/Logout)
-- Role-based Access Control (User/Admin)
-- Admin Dashboard for User Management
-- Secure Password Requirements
-- MongoDB Database Integration
-- RESTful API Backend
-- Modern React Frontend with Material-UI
+- **User Authentication**
+  - Secure login and registration
+  - Password requirements (min 3 chars, must include number and symbol)
+  - JWT-based authentication
+  - Protected routes
+
+- **Admin Dashboard**
+  - User management (view, edit roles, delete users)
+  - Real-time user data display
+  - Role-based access control
+
+- **Residential Property Management**
+  - Detailed property listings
+  - Property search and filtering
+  - Property details including:
+    - Address and location
+    - Price and specifications
+    - Property type and description
 
 ## Tech Stack
 
 ### Frontend
-- React
-- Material-UI
-- Emotion (for styled components)
-- React Router
-- Axios
+- React.js
+- Material-UI (MUI)
+- Emotion for styling
+- React Router for navigation
+- Axios for API calls
 
 ### Backend
 - Node.js
-- Express
+- Express.js
 - MongoDB
-- Mongoose
-- JWT Authentication
-- Bcrypt for Password Hashing
+- Mongoose ODM
+- JWT for authentication
 
 ## Setup Instructions
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd ResAppCursor
+   ```
 
-### Installation
+2. **Backend Setup**
+   ```bash
+   cd backend
+   npm install
+   ```
+   - Create a `.env` file with:
+     ```
+     MONGODB_URI=your_mongodb_uri
+     JWT_SECRET=your_jwt_secret
+     PORT=5000
+     ```
+   - Start the backend server:
+     ```bash
+     npm run dev
+     ```
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd ResAppCursor
-```
+3. **Frontend Setup**
+   ```bash
+   cd frontend
+   npm install
+   ```
+   - Start the frontend development server:
+     ```bash
+     npm start
+     ```
 
-2. Install backend dependencies:
-```bash
-cd backend
-npm install
-```
+## Database Management
 
-3. Install frontend dependencies:
-```bash
-cd ../frontend
-npm install
-```
+### User Management
+- Create admin user:
+  ```bash
+  cd backend
+  npm run create-admin
+  ```
+- List all users:
+  ```bash
+  npm run list-users
+  ```
 
-4. Create a `.env` file in the backend directory:
-```env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-```
-
-### Running the Application
-
-1. Start the backend server:
-```bash
-cd backend
-npm run dev
-```
-
-2. Start the frontend development server:
-```bash
-cd frontend
-npm start
-```
-
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-
-## Admin Functionality
-
-### Creating the Initial Admin User
-
-To create the initial admin user, run:
-```bash
-cd backend
-npm run create-admin
-```
-
-Default admin credentials:
-- Email: admin@example.com
-- Password: Admin123!
-
-### Admin Dashboard Features
-
-1. **User Management**
-   - View all registered users
-   - Change user roles (User/Admin)
-   - Delete users
-
-2. **Access Control**
-   - Only users with admin role can access the admin dashboard
-   - Protected API endpoints with admin middleware
-
-### Password Requirements
-
-All passwords must meet the following criteria:
-- Minimum 3 characters
-- At least one number
-- At least one special character (!@#$%^&*(),.?":{}|<>)
+### Residential Data
+- Insert sample residential data:
+  ```bash
+  npm run insert-residential
+  ```
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
 
-### Admin (Protected)
+### Admin
 - `GET /api/admin/users` - Get all users
-- `PUT /api/admin/users/:id/role` - Update user role
+- `PUT /api/admin/users/:id` - Update user role
 - `DELETE /api/admin/users/:id` - Delete user
+
+### Residential
+- `GET /api/residential` - Get all properties
+- `POST /api/residential` - Add new property
+- `GET /api/residential/:id` - Get property details
+- `PUT /api/residential/:id` - Update property
+- `DELETE /api/residential/:id` - Delete property
 
 ## Security Features
 
 - Password hashing with bcrypt
-- JWT-based authentication
-- Role-based access control
+- JWT token authentication
 - Protected API routes
-- Secure password validation
+- Role-based access control
+- Environment variable configuration
 
 ## Contributing
 
@@ -160,20 +130,6 @@ All passwords must meet the following criteria:
 
 This project is licensed under the ISC License.
 
-### Authentication Features
+## Contact
 
-1. **Login**
-   - Email and password authentication
-   - JWT token generation
-   - Role-based access control
-
-2. **Registration**
-   - Secure password requirements
-   - Email and username validation
-   - Automatic role assignment (default: user)
-
-3. **Logout**
-   - Secure session termination
-   - Automatic redirection to home page
-   - Token and user data removal
-   - UI state refresh 
+For any queries or support, please contact the project maintainers. 
